@@ -4,7 +4,7 @@ FLAG = -Wextra -Wall -std=c++0x -g -o
 OBJECTS = ./obj/pawn.o ./obj/peice.o ./obj/elephant.o ./obj/king.o ./obj/queen.o ./obj/camel.o ./obj/horse.o ./obj/empty.o ./obj/entity.o ./obj/render.o ./obj/main.o
 
 output:  $(OBJECTS)
-	g++ $(OBJECTS) $(FLAG) game 
+	g++ $(OBJECTS) $(FLAG) ./bin/game 
 
 
 # user created files compilation........
