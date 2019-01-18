@@ -58,6 +58,7 @@ State state = idle;	// game state........
 
 // function prototypes.........
 bool init();
+void resetColors();
 void onEvent(keyboard Event);
 void display();
 void onDestroy();
@@ -454,8 +455,13 @@ bool checkMate(int playerId, int numChecks) {
 			}
 	}
 	// if more than one check is given to king and king can't move to safe place....
-	if(numChecks > 1)
-		return true;
+	if(numChecks > 1) {
+		if(playerId == 1)
+			strcpy(msg, "player 1 got checkMate");
+		else
+			strcpy(msg, "player 2 got checkMate");
+			return true;
+	}
 	// if check can be avoided by moving other peices...........
 	// path for loop iterators.......
 	int dx = sign(gotCheckFrom.x - p.x);
@@ -465,12 +471,20 @@ bool checkMate(int playerId, int numChecks) {
 	// loop in path......
 	for(;(p.y!=gotCheckFrom.y || p.x != gotCheckFrom.x) && p.x < boardWidth && p.y < boardHeight ;p.y+=dy, p.x+=dx)
 	{
-		if(canSomeoneMoveTo(p, playerId) == true)// if any peice can come in path to block check it's not a checkmate ....
+		if(canSomeoneMoveTo(p, playerId) == true) {// if any peice can come in path to block check it's not a checkmate ....
+			strcpy(msg, "king in check!");	// default msg..		
 			return false;
+		}
 	}
-	if(canSomeoneMoveTo(p, playerId) == true)// if any peice can kill that peice to cancel check it's not a checkmate .....
-			return false;
+	if(canSomeoneMoveTo(p, playerId) == true) {// if any peice can kill that peice to cancel check it's not a checkmate .....
+		strcpy(msg, "king in check!");	// default msg..			
+		return false;
+	}
 	// king got check in all places...hence check mate....
+	if(playerId == 1)
+	strcpy(msg, "player 1 got checkMate");
+	else
+	strcpy(msg, "player 2 got checkMate");
 	return true;
 } 
 
@@ -761,6 +775,7 @@ void onEvent(keyboard event){
 		else if(state == selected) {
 			if(movePeice()) {
 	// check if kings got check....
+				resetColors();	// reset colors to default....
 				int cFlagKing1 = isCheck(1);	// temporary store check status...
 				int cFlagKing2 = isCheck(2);
 	// if current move makes our king to get check.....invalid move...
@@ -771,14 +786,14 @@ void onEvent(keyboard event){
 					else
 						castlingP2 = false;
 					undoMove();
-					strcat(msg, " Invalid Move. ");	
+					strcpy(msg, " Invalid Move. ");	
 				}
 	// check happend to other player...do checkmate logic.. logic.......
 				else if(cFlagKing1) {
 					if(checkMate(1, cFlagKing1) == true) {
 						running = false;
 						win = true;
-						strcpy(msg, "congratulation...player 2 won !!");
+						strcat(msg, "player 2 won !!");
 						return;
 					}
 				}
@@ -786,7 +801,7 @@ void onEvent(keyboard event){
 					if(checkMate(2, cFlagKing2) == true) {
 						running = false;
 						win = true;
-						strcpy(msg, "congratulation...player 1 won !!");
+						strcat(msg, " player 1 won !!");
 						return;
 					}
 				}
@@ -822,51 +837,32 @@ bool init()
 	for(int i=0;i<boardWidth;i++) {
 		// row 6 and 2 initialize with pawn.......
 		chessBoard[6][i] = new pawn(i, 6, 1);
-		chessBoard[6][i]->setColor(P1_COLOR);
 		chessBoard[1][i] = new pawn(i, 1, 2);
-		chessBoard[1][i]->setColor(P2_COLOR);
 	}
 	// allocatte each peice to chess board and set color for each player.......
 	chessBoard[0][0] = new elephant(0, 0, 2);
-	chessBoard[0][0]->setColor(P2_COLOR);
 	chessBoard[7][0] = new elephant(0, 7, 1);
-	chessBoard[7][0]->setColor(P1_COLOR);
 	chessBoard[7][1] = new horse(1, 7, 1);
-	chessBoard[7][1]->setColor(P1_COLOR);
 	chessBoard[0][1] = new horse(1, 0, 2);
-	chessBoard[0][1]->setColor(P2_COLOR);
 	chessBoard[7][2] = new camel(2, 7, 1);
-	chessBoard[7][2]->setColor(P1_COLOR);
 	chessBoard[0][2] = new camel(2, 0, 2);
-	chessBoard[0][2]->setColor(P2_COLOR);
 	chessBoard[7][3] = new queen(3, 7, 1);
-	chessBoard[7][3]->setColor(P1_COLOR);
 	chessBoard[0][3] = new queen(3, 0, 2);
-	chessBoard[0][3]->setColor(P2_COLOR);
 	chessBoard[7][4] = new king(4, 7, 1);
-	chessBoard[7][4]->setColor(P1_COLOR);
 	chessBoard[0][4] = new king(4, 0, 2);
-	chessBoard[0][4]->setColor(P2_COLOR);
 	chessBoard[7][5] = new camel(5, 7, 1);
-	chessBoard[7][5]->setColor(P1_COLOR);
 	chessBoard[0][5] = new camel(5, 0, 2);
-	chessBoard[0][5]->setColor(P2_COLOR);
 	chessBoard[7][6] = new horse(6, 7, 1);
-	chessBoard[7][6]->setColor(P1_COLOR);
 	chessBoard[0][6] = new horse(6, 0, 2);
-	chessBoard[0][6]->setColor(P2_COLOR);
 	chessBoard[7][7] = new elephant(7, 7, 1);
-	chessBoard[7][7]->setColor(P1_COLOR);
 	chessBoard[0][7] = new elephant(7, 0, 2);
-	chessBoard[0][7]->setColor(P2_COLOR);
 	
 	// empty objects...............
 	for(int row=2;row<6;row++)
 		for(int col=0;col<boardWidth;col++) {
 			chessBoard[row][col] = new empty(col, row);
-			chessBoard[row][col]->setColor(FC_EMPTY);
 		}
-	
+	resetColors();	// set default colors of peices....
 	// array for killed peices........
 	player1Killed = new peice**[boardHeight];
 	player2Killed = new peice**[boardHeight];
@@ -890,6 +886,19 @@ bool init()
 	// set initial selected color for first peice.......
 	chessBoard[player->y][player->x]->setColor(FC_UNSELECTED);
 	return true;
+}
+
+void resetColors() {
+	for(int row=0;row<boardHeight;row++)
+		for(int col=0;col<boardWidth;col++){
+		int id = chessBoard[row][col]->getPlayerId();
+		if(id == 0)	// empty box...
+			chessBoard[row][col]->setColor(FC_EMPTY);
+		else if(id == 1)
+			chessBoard[row][col]->setColor(P1_COLOR);
+		else if(id == 2)
+			chessBoard[row][col]->setColor(P2_COLOR);
+	}
 }
 
 // display all the elements of game on terminal............
