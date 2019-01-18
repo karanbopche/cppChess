@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include "color.h"
-
+#include <unistd.h>
 
 
 enum keyboard {
